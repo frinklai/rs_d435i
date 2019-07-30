@@ -29,51 +29,81 @@ Train_Data_Dir = os.path.dirname(os.path.realpath(__file__)) + '/Training_Data/'
 
 class Get_image():
     def __init__(self):
-            rospy.init_node('get_image_from_rs_d435i', anonymous=True)
-            self.bridge = CvBridge()
-            self.image = np.zeros((0,0,3), np.uint8)
-            self.take_picture_counter = 0
-            # self.mtx = np.load('/home/iclab-arm/AI_Bot_ws/src/AI_Bot/vision/get_image/scripts/'+'camera_calibration_mtx.npy')
-            # self.dist = np.load('/home/iclab-arm/AI_Bot_ws/src/AI_Bot/vision/get_image/scripts/'+'camera_calibration_dist.npy')
-            # self.newcameramtx = np.load('/home/iclab-arm/AI_Bot_ws/src/AI_Bot/vision/get_image/scripts/'+'camera_calibration_newcameramtx.npy')
-            # self.dst_roi_x, self.dst_roi_y, self.dst_roi_w, self.dst_roi_h  = np.load('/home/iclab-arm/AI_Bot_ws/src/AI_Bot/vision/get_image/scripts/'+'camera_calibration_roi.npy')
-
-            #s = rospy.Service("request FLIR", FLIR_image, self.service_callback)
             
+        self.bridge = CvBridge()
+        self.image = np.zeros((0,0,3), np.uint8)
+        self.depth = np.zeros((0,0,3), np.uint8)
+        self.take_picture_counter = 0
+
+        rospy.Subscriber("/camera/color/image_raw", Image, self.rgb_callback)
+        # rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.depth_callback)
+        # rospy.Subscriber("/camera/aligned_depth_to_infra1/image_raw", Image, self.depth_callback)
+        # rospy.Subscriber("/camera/infra1/image_rect_raw", Image, self.depth_callback) 
+
+        rospy.Subscriber("/camera/aligned_depth_to_color/image_raw", Image, self.depth_callback)
+
+        self.cv_image = None
+        self.cv_depth = None
+        self.display_mode = 'rgbd'
+
             
-            # rospy.Subscriber("/camera/image_color", Image, self.callback)
-            rospy.Subscriber("/camera/color/image_raw", Image, self.callback)
-            self.cv_image = None
 
-            rospy.spin()
+    def show_image(self):
+        image_dim = np.asarray(self.cv_image).shape
+        depth_dim = np.asarray(self.cv_depth).shape
+        # print(type(self.cv_depth))
+        
+        if(self.display_mode=='rgb'):
+            cv2.imshow("rgb result", self.cv_image)
 
-    def callback(self, data):
+        elif(self.display_mode=='depth'):
+            cv2.imshow("depth result", self.cv_depth)
+
+        elif(self.display_mode=='rgbd'):
+            if(image_dim == depth_dim):
+                rgbd_images = np.hstack((self.cv_image, self.cv_depth))
+                cv2.imshow("rgbd result", rgbd_images)
+            # else:
+            #     print('dim error')
+        else:
+            print('unknow mode')
+            pass
+        
+
+        cv2.waitKey(1)
+
+    def rgb_callback(self, data):
         try:
-            self.cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            # self.cv_image = image
-            # self.un_dst_img = cv2.undistort(self.cv_image, self.mtx, self.dist, None, self.newcameramtx)
-            # self.un_dst_img = self.un_dst_img[self.dst_roi_y:self.dst_roi_y+self.dst_roi_h, \
-            #         self.dst_roi_x:self.dst_roi_x+self.dst_roi_w]
+            self.cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")    # for rgb image
+
         except CvBridgeError as e:
             print(e)
-        # print('show img')
-        cv2.namedWindow("result", cv2.WINDOW_NORMAL)
-        cv2.imshow("result", self.cv_image)
-        self.get_image(self.cv_image)
-        cv2.waitKey(1)
+
+        if(self.display_mode=='rgb')or(self.display_mode=='rgbd'):
+            self.show_image()   
+        # cv2.imshow("rgb result", self.cv_image)
+        # cv2.waitKey(1)
+
+    def depth_callback(self, data):
+        try:
+            self.cv_depth = self.bridge.imgmsg_to_cv2(data, "16UC1")    # for depth image 16UC1
+            self.cv_depth = cv2.applyColorMap(cv2.convertScaleAbs(self.cv_depth, alpha=0.03), cv2.COLORMAP_JET)
+
+        except CvBridgeError as e:
+            print(e)
+        if(self.display_mode=='depth'):
+            self.show_image()
+        # cv2.imshow("depth result", self.cv_depth)
+        # cv2.waitKey(1)
+
+
     
-    def get_image(self, crop_image):
-        if cv2.waitKey(33) & 0xFF == ord('s'):
-            #name = str(Train_Data_Dir + str(datetime.datetime.now()) + '_' + Object_Name + '_' + str(self.take_picture_counter+1) + ".jpg")
-            name = str(Train_Data_Dir + str(Object_Name + '_' + str(self.take_picture_counter+1) + ".jpg"))
-            cv2.imwrite(name,crop_image)
-            print("[Save] ", name)
-            self.take_picture_counter += 1
-        else:
-            pass
 
 if __name__ == '__main__':
 
     print('python version is: ', sys.version)
+    rospy.init_node('get_image_from_rs_d435i', anonymous=True)
     listener = Get_image()
+    rospy.spin()
     cv2.destroyAllWindows()
+    

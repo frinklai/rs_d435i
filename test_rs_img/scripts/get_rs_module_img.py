@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-sys.path.insert(1, "/home/timda/.local/lib/python3.5/site-packages/")
+sys.path.insert(1, "/home/iarc/.local/lib/python3.5/site-packages/")
 import rospy
 import cv2
 from get_rs_image import Get_image

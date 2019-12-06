@@ -2,6 +2,7 @@
 
 import sys
 sys.path.insert(1, "/home/timda/.local/lib/python3.5/site-packages/")
+sys.path.insert(2, "/home/timda/rs_d435i_ws/catkin_workspace/install/lib/python3/dist-packages")
 import rospy
 import cv2
 from get_rs_image import Get_image

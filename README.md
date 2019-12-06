@@ -8,9 +8,12 @@
 
 ### Environment setting
 - Change the path of the following files: 
-    * get_rs_image/scripts/get_rs_image.Get_Image.py
-    * rs_d435i/test_rs_img/scripts/get_rs_module_img.py
+    * file1: get_rs_image/scripts/get_rs_image.Get_Image.py
+    * file2: rs_d435i/test_rs_img/scripts/get_rs_module_img.py
 - Change this: sys.path.insert(1, "/home/<your_pc_name>/.local/lib/python3.5/site-packages/")
+    * Do change in file1 and file2
+- Change this: sys.path.insert(2, "/home/<your_pc_name>/<your_workspace_name>/catkin_workspace/install/lib/python3/dist-packages")
+    * Do change only in file2
 - python may be different for different pc, please check your path
 
 ### Display image from d435i by using ros
@@ -26,6 +29,5 @@ open new terminal
 
 ```
 . /devel/setup.bash 
-. ../catkin_workspace/install/setup.bash --extend
 rosrun test_rs_img get_rs_module_img.py
 ```

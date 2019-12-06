@@ -3,7 +3,7 @@
 import sys
 # sys.path.insert(1, "/usr/local/lib/python3.5/dist-packages/")
 
-sys.path.insert(1, "/home/timda/.local/lib/python3.5/site-packages/")
+sys.path.insert(1, "/home/iarc/.local/lib/python3.5/site-packages/")
 # sys.path.insert(0, '/opt/installer/open_cv/cv_bridge/lib/python3/dist-packages/')
 import rospy
 from sensor_msgs.msg import Image
